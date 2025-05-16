@@ -1,0 +1,6 @@
+scale_factor = 8
+
+EPOCHS = 00 # 訓練輪次
+BATCH_SIZE = 16 # 批次大小
+LEARNING_RATE = 0.0001
+MODEL_SAVE_PATH = "srcnn_model.h5"
