@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 KERAS_MODEL_PATH = "srcnn_model.h5" # 請確認模型檔名是否正確
-TFLITE_MODEL_SAVE_PATH = "srcnn_model.tflite"
+TFLITE_MODEL_SAVE_PATH = "srcnn_model_OPT.tflite"
 
 # 假設模型輸入尺寸 (與訓練時的 TARGET_SHAPE_FOR_DATA 一致)
 # 這是為了獲取 concrete function 時提供輸入簽名
@@ -45,7 +45,7 @@ try:
     converter = tf.lite.TFLiteConverter.from_concrete_functions([concrete_func])
 
     # (可選) 啟用優化
-    # converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    converter.optimizations = [tf.lite.Optimize.DEFAULT]
 
     tflite_model_content = converter.convert()
     print("模型轉換成功。")
