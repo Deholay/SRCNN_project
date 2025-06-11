@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raspberry Pi 即時SRCNN串流</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; background-color: #f0f0f0; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .stream-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; width: 100%; }
+        .video-wrapper { border: 2px solid #ccc; padding: 10px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .video-wrapper h2 { margin-top: 0; text-align: center; color: #333; }
+        .video-wrapper img { display: block; width: 100%; max-width: 640px; height: auto; background-color: #000; }
+        h1 { color: #444; margin-bottom: 30px; }
+        p {text-align: center; color: #555; margin-top: 20px;}
+    </style>
+</head>
+<body>
+    <h1>Raspberry Pi 即時SRCNN串流</h1>
+    <div class="stream-container">
+        <div class="video-wrapper">
+            <h2>原始影像串流</h2>
+            <img id="raw_stream" src="{{ url_for('video_feed_raw') }}" alt="原始影像串流">
+        </div>
+        <div class="video-wrapper">
+            <h2>SRCNN影像串流 </h2>
+            <img id="sr_stream" src="{{ url_for('video_feed_sr') }}" alt="超解析度影像串流">
+        </div>
+    </div>
+    <p>注意：超解析度處理會消耗大量運算資源，串流幀率可能會較低。</p>
+    <script>
+        function checkImage(imgElementId, streamUrl) {
+            const img = document.getElementById(imgElementId);
+            if (img) {
+                img.onerror = function() {
+                    console.error("串流 '" + imgElementId + "' 載入錯誤，5 秒後嘗試重新載入...");
+                    img.alt = "串流載入失敗，正在嘗試重新載入...";
+                    setTimeout(function() {
+                        img.src = streamUrl + "?t=" + new Date().getTime(); 
+                        img.alt = imgElementId.includes("raw") ? "原始影像串流" : "超解析度影像串流";
+                    }, 5000);
+                };
+            }
+        }
+        checkImage("raw_stream", "{{ url_for('video_feed_raw') }}");
+        checkImage("sr_stream", "{{ url_for('video_feed_sr') }}");
+    </script>
+</body>
+</html>
