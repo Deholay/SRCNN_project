@@ -1,7 +1,7 @@
 # SRCNN Project (Super Resolution by CNN)
 本專案訓練了一個超解析度卷積神經網路 (SRCNN) 模型，並將其透過參數量化的方式部署到 Raspberry Pi4 上，以對來自相機的即時影像進行超解析度處理，最後透過 HTTP 將原始影像和處理後的影像串流到網頁瀏覽器進行展示。另外，還分析了在不同量化參數選擇下， SRCNN 在 edge 端（Raspberry Pi4）的表現。
 
-[This is an alt text.](gray_image.jpg "This is a sample image.")
+![This is an alt text.](gray_image.jpg "This is a sample image.")
 
 相關文獻閱讀筆記與研究報告 slides 在 [Notion](https://mire-power-709.notion.site/SRCNN-Project-Super-Resolution-by-CNN-20eb695eb67680cfa907ee49e66a3191).
 
