@@ -21,10 +21,10 @@
 .
 ├── 1_model_training_and_conversion/  # Stage1：模型訓練與轉換 (在 PC 上執行)
 │   ├── CheckGPU.py                   # 檢查 GPU 環境
-│   ├── train_srcnn.py                # 主要的模型訓練程式
+│   ├── SRCNNtrain.py                 # 主要的模型訓練程式
 │   ├── inspect_model.py              # 檢查模型結構的工具
-│   ├── srcnn_model_v1.h5             # 訓練好的 .h5 模型
-│   └── converter                     # 存放各種不同數字型態將 .h5 模型轉換為 .tflite 的工具
+│   ├── srcnn_model.h5                # 訓練好的 .h5 模型
+│   └── converter/                    # 存放各種不同數字型態將 .h5 模型轉換為 .tflite 的工具
 │       ├── convert_model_FP16.py     # 將模型權重轉為 float16
 │       ├── convert_model_INT8.py     # 將模型權重轉為 int8
 │       └── convert_model.py          # 單純轉換
@@ -34,14 +34,14 @@
 │   ├── appFPS.py                     # 獨立的 FPS 測試程式
 │   ├── srcnn_model_FP16.tflite       # 轉換好的 .tflite 模型（float16）
 │   ├── srcnn_model_INT8.tflite       # 轉換好的 .tflite 模型（int8）
-│   ├── srcnn_model_OPT.tflite        # 轉換好的 .tflite 模型
-│   ├── srcnn_model.tflite            # 轉換好的 .tflite 模型（啟用優化）
+│   ├── srcnn_model_OPT.tflite        # 轉換好的 .tflite 模型（啟用優化）
+│   ├── srcnn_model.tflite            # 轉換好的 .tflite 模型
 │   └── templates/
 │       └── index.html                # 網頁前端範本
 │
 ├── utils/                            # 輔助工具與程式
-│   ├── create_lr_images.py           # 產生低解析度影像資料集的程式
-│   └── convert_grayscale.py          # 轉換影像為灰階的工具
+│   ├── CreateLR_IMG.py               # 產生低解析度影像資料集的程式
+│   └── convert_gray.py               # 轉換影像為灰階的工具
 │
 ├── dataset/                          # 資料集存放區
 │   ├── hr_train/                     # 原始高解析度 training 影像
@@ -53,15 +53,13 @@
 │   └── lr_valid/                     # 產生的低解析度 valid 影像
 │       └── ...
 │
-├── training_logs/                    # 訓練日誌與結果
-│   ├── train_run_1.0/                # 每次訓練的獨立資料夾
-│   │   ├── training_history.png      # 訓練歷史曲線圖
-│   │   ├── comparison_xxxx.png       # 訓練後的評估比較圖
-│   │   ├── info.txt                  # 進行此次訓練的參數
-│   │   └── training_output.log       # 訓練過程的文字日誌
-│   └── ...                           # 其他訓練紀錄
-│
-└── README.md                         # 專案說明文件
+└── training_logs/                    # 訓練日誌與結果
+    ├── Train1.0/                     # 每次訓練的獨立資料夾
+    │   ├── training_history.png      # 訓練歷史曲線圖
+    │   ├── comparison_xxxx.png       # 訓練後的評估比較圖
+    │   ├── info.txt                  # 進行此次訓練的參數
+    │   └── srcnn_model.h5.           # 當次訓練的模型檔案
+    └── ...                           # 其他訓練紀錄
 ```
 
 注： dataset 內容需要自行收集圖片資料，例如：[DIV2K](https://data.vision.ee.ethz.ch/cvl/DIV2K/)（提供大量高解析度圖片）
@@ -101,7 +99,7 @@
     pip3 install Pillow --break-system-packages
     ```
     * __安裝 TensorFlow Lite Runtime__：
-    根據您的 Raspberry Pi OS 版本和架構 (armv7l 或 aarch64) 從 TensorFlow 官方網站或可信來源下載合適的 .whl 檔案並安裝。
+    根據您的 Raspberry Pi OS 版本和架構 (armv7l 或 aarch64) 從 TensorFlow 官方網站或可信來源下載合適的 `.whl` 檔案並安裝。
     一個可能的安裝方式 (如果您的 Pi OS 和 Python 版本受支援)：
     ```
     echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | sudo tee /etc/apt/sources.list.d/coral-edgetpu.list
@@ -113,8 +111,8 @@
 
 ## 使用流程
 1. __訓練 SRCNN 模型__
-    1. __準備資料集__： 確保 dataset/hr_train 和 dataset/hr_val 中有足夠的高解析度影像。
-    2. __配置訓練腳本__： 打開 1_model_training_and_conversion/train_srcnn.py ，根據您的需求修改以下參數：
+    1. __準備資料集__： 確保 `dataset/hr_train` 和 `dataset/hr_val` 中有足夠的高解析度影像。
+    2. __配置訓練腳本__： 打開 `1_model_training_and_conversion/train_srcnn.py` ，根據您的需求修改以下參數：
         * `LR_TRAIN_DIR`, `HR_TRAIN_DIR`, `LR_VAL_DIR`, `HR_VAL_DIR` (指向您的資料集路徑)
         * `TARGET_SHAPE_FOR_DATA` (模型訓練時的輸入/輸出影像塊尺寸，例如： `(512, 512)` )
         * `SCALE_FACTOR_ASSUMED_FOR_LR_CREATION` (例如 `6`，用於產生 LR 影像的降採樣倍率)
@@ -139,7 +137,7 @@
 3. __在 Raspberry Pi 上運行即時串流應用__
     1. __複製檔案到 Raspberry Pi__：
         * 將轉換後的 `.tflite 模型檔案` (例如 `srcnn_model.tflite`) 複製到 Raspberry Pi 上的 `rpi_sr_streamer/` 資料夾內。
-        * 將 `2_raspberry_pi_deployment/app.py` 和 `2_raspberry_pi_deployment/templates/i
+        * 將 `2_raspberry_pi_deployment/app.py` 和 `2_raspberry_pi_deployment/templates/index.html`
     2. __配置 app.py__：
         * 打開 Raspberry Pi 上的 `2_raspberry_pi_deployment/app.py`。
         * 確認 `TFLITE_MODEL_PATH` 指向您複製過來的 `.tflite` 模型檔案。
